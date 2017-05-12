@@ -1,13 +1,14 @@
 from __future__ import unicode_literals
 
 from django.contrib import admin
+from django.utils.translation import ugettext_lazy as _
 
 from mailer.models import Message, DontSendEntry, MessageLog
 
 
 def show_to(message):
     return ", ".join(message.to_addresses)
-show_to.short_description = "To"  # noqa: E305
+show_to.short_description = _("To")  # noqa: E305
 
 
 class MessageAdminMixin(object):
@@ -17,14 +18,15 @@ class MessageAdminMixin(object):
         if hasattr(email, 'body'):
             return email.body
         else:
-            return "<Can't decode>"
+            return _("<Can't decode>")
+    plain_text_body.short_description = _("Plain text body")
 
 
 class MessageAdmin(MessageAdminMixin, admin.ModelAdmin):
 
     list_display = ["id", show_to, "subject", "when_added", "priority"]
     readonly_fields = ['plain_text_body']
-    date_hierarchy = "when_added"
+    #date_hierarchy = "when_added"
 
 
 class DontSendEntryAdmin(admin.ModelAdmin):
@@ -36,11 +38,11 @@ class MessageLogAdmin(MessageAdminMixin, admin.ModelAdmin):
 
     list_display = ["id", show_to, "subject", "message_id", "when_attempted", "result"]
     list_filter = ["result"]
-    date_hierarchy = "when_attempted"
+    #date_hierarchy = "when_attempted"
     readonly_fields = ['plain_text_body', 'message_id']
     search_fields = ['message_id']
 
 
 admin.site.register(Message, MessageAdmin)
-admin.site.register(DontSendEntry, DontSendEntryAdmin)
+#admin.site.register(DontSendEntry, DontSendEntryAdmin)
 admin.site.register(MessageLog, MessageLogAdmin)

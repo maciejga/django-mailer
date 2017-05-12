@@ -18,10 +18,10 @@ PRIORITY_LOW = "3"
 PRIORITY_DEFERRED = "4"
 
 PRIORITIES = [
-    (PRIORITY_HIGH, "high"),
-    (PRIORITY_MEDIUM, "medium"),
-    (PRIORITY_LOW, "low"),
-    (PRIORITY_DEFERRED, "deferred"),
+    (PRIORITY_HIGH, _("high")),
+    (PRIORITY_MEDIUM, _("medium")),
+    (PRIORITY_LOW, _("low")),
+    (PRIORITY_DEFERRED, _("deferred")),
 ]
 
 PRIORITY_MAPPING = dict((label, v) for (v, label) in PRIORITIES)
@@ -108,9 +108,9 @@ def db_to_email(data):
 class Message(models.Model):
 
     # The actual data - a pickled EmailMessage
-    message_data = models.TextField()
-    when_added = models.DateTimeField(default=datetime_now)
-    priority = models.CharField(max_length=1, choices=PRIORITIES, default=PRIORITY_MEDIUM)
+    message_data = models.TextField(_("Message data"))
+    when_added = models.DateTimeField(_("When added"), default=datetime_now)
+    priority = models.CharField(_("Priority"), max_length=1, choices=PRIORITIES, default=PRIORITY_MEDIUM)
     # @@@ campaign?
     # @@@ content_type?
 
@@ -120,6 +120,9 @@ class Message(models.Model):
         verbose_name = _("message")
         verbose_name_plural = _("messages")
 
+    def __unicode__(self):
+        return self.__str__()
+
     def __str__(self):
         try:
             email = self.email
@@ -127,7 +130,7 @@ class Message(models.Model):
                                                    email.subject,
                                                    ", ".join(email.to))
         except Exception:
-            return "<Message repr unavailable>"
+            return _("<Message repr unavailable>")
 
     def defer(self):
         self.priority = PRIORITY_DEFERRED
@@ -160,6 +163,7 @@ set the attribute again to cause the underlying serialised data to be updated.""
             return email.to
         else:
             return []
+    to_addresses.fget.short_description = _('To')
 
     @property
     def subject(self):
@@ -168,6 +172,7 @@ set the attribute again to cause the underlying serialised data to be updated.""
             return email.subject
         else:
             return ""
+    subject.fget.short_description = _('Subject')
 
 
 def filter_recipient_list(lst):
@@ -221,8 +226,8 @@ class DontSendEntryManager(models.Manager):
 
 class DontSendEntry(models.Model):
 
-    to_address = models.EmailField(max_length=254)
-    when_added = models.DateTimeField()
+    to_address = models.EmailField(_("To address"), max_length=254)
+    when_added = models.DateTimeField(_("When added"))
     # @@@ who added?
     # @@@ comment field?
 
@@ -238,9 +243,9 @@ RESULT_DONT_SEND = "2"
 RESULT_FAILURE = "3"
 
 RESULT_CODES = (
-    (RESULT_SUCCESS, "success"),
-    (RESULT_DONT_SEND, "don't send"),
-    (RESULT_FAILURE, "failure"),
+    (RESULT_SUCCESS, _("success")),
+    (RESULT_DONT_SEND, _("don't send")),
+    (RESULT_FAILURE, _("failure")),
     # @@@ other types of failure?
 )
 
@@ -274,22 +279,25 @@ class MessageLogManager(models.Manager):
 class MessageLog(models.Model):
 
     # fields from Message
-    message_data = models.TextField()
-    message_id = models.TextField(editable=False, null=True)
-    when_added = models.DateTimeField(db_index=True)
-    priority = models.CharField(max_length=1, choices=PRIORITIES, db_index=True)
+    message_data = models.TextField(_("Message data"))
+    message_id = models.TextField(_("Message id"), editable=False, null=True)
+    when_added = models.DateTimeField(_("When added"), db_index=True)
+    priority = models.CharField(_("Priority"), max_length=1, choices=PRIORITIES, db_index=True)
     # @@@ campaign?
 
     # additional logging fields
-    when_attempted = models.DateTimeField(default=datetime_now)
-    result = models.CharField(max_length=1, choices=RESULT_CODES)
-    log_message = models.TextField()
+    when_attempted = models.DateTimeField(_("When attempted"), default=datetime_now)
+    result = models.CharField(_("Result"), max_length=1, choices=RESULT_CODES)
+    log_message = models.TextField(_("Log message"),)
 
     objects = MessageLogManager()
 
     class Meta:
         verbose_name = _("message log")
         verbose_name_plural = _("message logs")
+
+    def __unicode__(self):
+        return self.__str__()
 
     def __str__(self):
         try:
@@ -298,7 +306,7 @@ class MessageLog(models.Model):
                                                    email.subject,
                                                    ", ".join(email.to))
         except Exception:
-            return "<MessageLog repr unavailable>"
+            return _("<MessageLog repr unavailable>")
 
     @property
     def email(self):
@@ -311,6 +319,7 @@ class MessageLog(models.Model):
             return email.to
         else:
             return []
+    to_addresses.fget.short_description = _('To')
 
     @property
     def subject(self):
@@ -319,3 +328,4 @@ class MessageLog(models.Model):
             return email.subject
         else:
             return ""
+    subject.fget.short_description = _('Subject')
