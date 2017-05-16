@@ -13,6 +13,18 @@ show_to.short_description = _("To")  # noqa: E305
 
 class MessageAdminMixin(object):
 
+    def get_actions(self, request):
+        actions = super(MessageAdminMixin, self).get_actions(request)
+        if 'delete_selected' in actions:
+            del actions['delete_selected']
+        return actions
+
+    def has_delete_permission(self, request, obj=None):
+        return False
+
+    def has_add_permission(self, request):
+        return False
+
     def plain_text_body(self, instance):
         email = instance.email
         if hasattr(email, 'body'):
@@ -39,8 +51,9 @@ class MessageLogAdmin(MessageAdminMixin, admin.ModelAdmin):
     list_display = ["id", show_to, "subject", "message_id", "when_attempted", "result"]
     list_filter = ["result"]
     #date_hierarchy = "when_attempted"
-    readonly_fields = ['plain_text_body', 'message_id']
+    readonly_fields = ['message_id', "when_added", "priority", "result", "log_message", "when_attempted", 'plain_text_body',]
     search_fields = ['message_id']
+    exclude = ('message_data',)
 
 
 admin.site.register(Message, MessageAdmin)

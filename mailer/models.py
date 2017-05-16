@@ -124,13 +124,7 @@ class Message(models.Model):
         return self.__str__()
 
     def __str__(self):
-        try:
-            email = self.email
-            return "On {0}, \"{1}\" to {2}".format(self.when_added,
-                                                   email.subject,
-                                                   ", ".join(email.to))
-        except Exception:
-            return _("<Message repr unavailable>")
+        return ", ".join(self.email.to)
 
     def defer(self):
         self.priority = PRIORITY_DEFERRED
@@ -300,13 +294,8 @@ class MessageLog(models.Model):
         return self.__str__()
 
     def __str__(self):
-        try:
-            email = self.email
-            return "On {0}, \"{1}\" to {2}".format(self.when_attempted,
-                                                   email.subject,
-                                                   ", ".join(email.to))
-        except Exception:
-            return _("<MessageLog repr unavailable>")
+        return ", ".join(self.email.to)
+
 
     @property
     def email(self):
